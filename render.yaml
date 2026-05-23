@@ -6,7 +6,7 @@ services:
     rootDir: .
     buildCommand: npm ci --include=dev && npm run build && npm prune --omit=dev
     startCommand: npm run start:prod
-    healthCheckPath: /api/game/leaderboard
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 20

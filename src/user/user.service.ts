@@ -11,6 +11,44 @@ interface UserProfile {
   email: string;
 }
 
+function normalizeRedisUrl(rawRedisUrl?: string): string | undefined {
+  if (!rawRedisUrl) {
+    return undefined;
+  }
+
+  let value = rawRedisUrl.trim();
+
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+
+  const embeddedUrlIndex = Math.max(
+    value.indexOf('rediss://'),
+    value.indexOf('redis://'),
+  );
+  if (embeddedUrlIndex > 0) {
+    value = value.slice(embeddedUrlIndex);
+  }
+
+  if (value.startsWith('redis-cli')) {
+    const match = value.match(/-u\s+(\S+)/);
+    if (match?.[1]) {
+      value = match[1].trim();
+    }
+  }
+
+  value = value.replace(/^['"]|['"]$/g, '');
+
+  if (value.includes('upstash.io') && value.startsWith('redis://')) {
+    value = `rediss://${value.slice('redis://'.length)}`;
+  }
+
+  return value;
+}
+
 @Injectable()
 export class UserService {
   private readonly redisClient: Redis;
@@ -26,7 +64,7 @@ export class UserService {
     // });
 
     // สำหรับการตั้งค่า Redis Client Upstash
-    const redisUrl = process.env.REDIS_URL;
+    const redisUrl = normalizeRedisUrl(process.env.REDIS_URL);
     if (redisUrl) {
       this.redisClient = new Redis(redisUrl);
     } else {

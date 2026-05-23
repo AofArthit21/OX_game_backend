@@ -82,10 +82,17 @@ export class UserService {
     const CACHE_KEY = 'leaderboard';
     const TTL = 300; // Time To Live: 5 นาที
 
-    const cachedData = await this.redisClient.get(CACHE_KEY);
-    if (cachedData) {
-      console.log('Returning leaderboard from Redis cache.');
-      return JSON.parse(cachedData) as User[];
+    try {
+      const cachedData = await this.redisClient.get(CACHE_KEY);
+      if (cachedData) {
+        console.log('Returning leaderboard from Redis cache.');
+        return JSON.parse(cachedData) as User[];
+      }
+    } catch (error) {
+      console.warn(
+        '[Redis Warning] Cache read failed, fallback to database query.',
+        error,
+      );
     }
 
     const leaderboard = await this.usersRepository.find({
@@ -96,13 +103,17 @@ export class UserService {
       take: 100,
     });
 
-    await this.redisClient.set(
-      CACHE_KEY,
-      JSON.stringify(leaderboard),
-      'EX',
-      TTL,
-    );
-    console.log('Leaderboard cached in Redis.');
+    try {
+      await this.redisClient.set(
+        CACHE_KEY,
+        JSON.stringify(leaderboard),
+        'EX',
+        TTL,
+      );
+      console.log('Leaderboard cached in Redis.');
+    } catch (error) {
+      console.warn('[Redis Warning] Cache write failed.', error);
+    }
 
     return leaderboard;
   }

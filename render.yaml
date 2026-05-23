@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: ox-game-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/game/leaderboard
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_SSL
+        value: "true"
+      - key: TYPEORM_SYNCHRONIZE
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false

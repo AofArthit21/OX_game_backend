@@ -1,5 +1,5 @@
 export interface BaseUserProfile {
-  provider: string; // 'google', 'facebook', etc.
+  provider: string; // e.g. 'google'
   providerId: string; // ID เฉพาะสำหรับ provider นั้นๆ
   email: string | null;
   firstName: string | null;

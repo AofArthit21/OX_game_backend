@@ -27,10 +27,14 @@ export class UserService {
 
     // สำหรับการตั้งค่า Redis Client Upstash
     const redisUrl = process.env.REDIS_URL;
-    if (!redisUrl) {
-      throw new Error('REDIS_URL environment variable is not set.');
+    if (redisUrl) {
+      this.redisClient = new Redis(redisUrl);
+    } else {
+      this.redisClient = new Redis({
+        host: process.env.REDIS_HOST || '127.0.0.1',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      });
     }
-    this.redisClient = new Redis(redisUrl);
 
     this.redisClient.on('error', (err) => {
       console.error(

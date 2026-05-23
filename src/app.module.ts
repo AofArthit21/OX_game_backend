@@ -9,19 +9,19 @@ import { Game } from './game/game.entity';
 
 @Module({
   imports: [
-    // ตั้งค่า ConfigModule ก่อนใครเพื่อน เพื่อโหลด .env
     ConfigModule.forRoot({ isGlobal: true }),
-
-    // ตั้งค่า TypeORM การเชื่อมต่อหลัก
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '3306', 10),
+      port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
+      ssl:
+        process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
       entities: [User, Game],
-      synchronize: true,
+      synchronize: process.env.TYPEORM_SYNCHRONIZE !== 'false',
     }),
 
     UserModule,
